@@ -5,6 +5,7 @@ FROM python:3.11-slim
 
 ENV TZ=Asia/Shanghai \
     PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
     ZZY_DATA_DIR=/app/data
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone

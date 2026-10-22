@@ -13,6 +13,8 @@ services:
     image: zzy-proj:${ZZY_IMAGE_TAG:-latest}
     container_name: zzy-proj
     restart: unless-stopped
+    # 与宿主机 chrissmart(1000) 同 UID：数据卷可被备份/CLI 读写，容器内也不用 root
+    user: "1000:1000"
     ports:
       - "127.0.0.1:8100:8100"
     env_file:
