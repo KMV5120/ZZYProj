@@ -74,8 +74,12 @@ SMTP 不可用时的管理员引导（应急，不经过邮件）：
 
 ```bash
 PYTHON=/path/to/python ./tools/create_user.py \
-  --email ab15630563156@163.com --password '强密码' --role admin
+  --email someone@example.com --password '强密码' --role admin \
+  --data-dir data/zzy
 ```
+
+`--data-dir data/zzy` 指向容器挂载的生产库；省略会写到 `.env` 里的开发库。
+脚本会先打印「目标库：…」，务必核对。
 
 ## 配置
 

@@ -59,11 +59,26 @@ cd ZZYProj
 | 观察 | 0–2h / 24h / 72h |
 | 残余风险 | 网易 SMTP 进垃圾箱；月度 token 允许小幅超额；管理员不可读正文仅为 API 契约 |
 
-**当前证据状态**（2026-10-22）：
+**当前证据状态**（2026-10-22 10:02 上线）：
 - 本地 G2 自动化通过：26 项 pytest + 29 项真实 HTTP 契约 smoke + 20 项 jsdom 前端接线 smoke；
 - 真实邮件（A1/A22）黄：QQ `smtp.qq.com:465` 登录成功，测试验证码 API 200；待收件箱确认；
-- 浏览器逐控件（A17/A19）红：按用户决定「部署后再测」；
-- 生产 G3（A19–A21）红：待用户授权部署与 nginx reload。
+- 外部子路径（A19）黄：curl 全通，浏览器 Network 待补；
+- 回滚（A20）绿：真实镜像切换，RTO 3s；
+- 摘除（A21）黄：逻辑在配置副本上演练，未在生产执行。
+
+## G3 部署证据（2026-10-22）
+
+| 项 | 值 |
+| --- | --- |
+| 仓库/commit | `feat/platformify` @ `0bb8a52`（代码镜像构建于 `2eb13e5`，其后仅 docs） |
+| 镜像 | `zzy-proj:ZZY_1.0.0` / `sha256:0b34eee964a7…`；容器 `user=1000:1000` |
+| 数据 | `data/zzy/zzy.db`；备份 `zzy.db.bak_20261022`，sha256 `82377464f72736ec…` |
+| nginx 备份 | `/etc/nginx/sites-available/learning-assistant.bak-20261022100235` |
+| 外部 smoke | `/ZZYProj` 301；`/ZZYProj/` 200；`/ZZYProj/healthz` 200；`/ZZYProj/api/*` 返回 zzy 信封；主站 `/` 200 |
+| 外部完整旅程 | 临时用户登录 → `/ZZYProj/api/chat` 真实 SSE（29 delta + done，usage 93/190）→ 清理 |
+| 回滚演练 | `zzy-proj:test` → `rollback.sh pre-rollback` → 回到 `0b34eee…`；RTO 3s；外部 healthz 200；DB 未丢 |
+| SMTP | QQ `smtp.qq.com:465`；测试验证码已发至 `2476318935@qq.com` |
+| 管理员 | **无默认管理员**（`ZZY_ADMIN_EMAILS` 空）；需要时显式指定 |
 
 ## 72 小时窗
 
