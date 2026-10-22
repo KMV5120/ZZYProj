@@ -78,7 +78,8 @@ cd ZZYProj
 | 外部完整旅程 | 临时用户登录 → `/ZZYProj/api/chat` 真实 SSE（29 delta + done，usage 93/190）→ 清理 |
 | 回滚演练 | `zzy-proj:test` → `rollback.sh pre-rollback` → 回到 `0b34eee…`；RTO 3s；外部 healthz 200；DB 未丢 |
 | SMTP | QQ `smtp.qq.com:465`；测试验证码已发至 `2476318935@qq.com` |
-| 管理员 | **无默认管理员**（`ZZY_ADMIN_EMAILS` 空）；需要时显式指定 |
+| 管理员 | 无默认管理员；显式管理员 `1636724670@qq.com`（已提升，审计 `bootstrap_admin`） |
+| SMTP 收件 | 用户已确认收到 QQ 验证码（2026-10-22） |
 
 ## 72 小时窗
 
