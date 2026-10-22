@@ -70,7 +70,7 @@ cd ZZYProj
 
 | 项 | 值 |
 | --- | --- |
-| 仓库/commit | `feat/platformify` @ `0bb8a52`（代码镜像构建于 `2eb13e5`，其后仅 docs） |
+| 仓库/commit | `feat/platformify` @ `e71a8a6`，已 push `origin/main` 与 `origin/feat/platformify`（镜像构建于 `2eb13e5`，其后仅 docs） |
 | 镜像 | `zzy-proj:ZZY_1.0.0` / `sha256:0b34eee964a7…`；容器 `user=1000:1000` |
 | 数据 | `data/zzy/zzy.db`；备份 `zzy.db.bak_20261022`，sha256 `82377464f72736ec…` |
 | nginx 备份 | `/etc/nginx/sites-available/learning-assistant.bak-20261022100235` |
