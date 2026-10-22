@@ -86,7 +86,7 @@ PYTHON=/path/to/python ./tools/create_user.py \
 | `ZZY_DAILY_LIMIT` | 默认每日消息数；`-1` 不限 |
 | `ZZY_MONTHLY_TOKEN_LIMIT` | 默认每月 token；`-1` 不限 |
 | `SMTP_HOST/PORT/USER/PASSWORD/FROM` | 网易 163：`smtp.163.com:465` SSL，密码是**授权码** |
-| `ZZY_ADMIN_EMAILS` | 初始管理员，逗号分隔 |
+| `ZZY_ADMIN_EMAILS` | 显式指定的管理员，逗号分隔；**默认留空 = 没有管理员**，需要时填写并重建容器 |
 
 未配置 SMTP 时服务仍可启动，但注册接口明确返回 503，不会静默“发送成功”。
 
