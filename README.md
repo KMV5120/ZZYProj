@@ -7,7 +7,8 @@
 - DeepSeek key 只在服务端，前端拿不到
 - 每日消息数 + 每月 token 双配额，管理员可按人覆盖
 - 管理后台：用量看板、用户列表、禁用/启用、调额度、审计
-- 独立容器 `zzy-proj`，挂在学习助手域名 `/ZZYProj/` 子路径；可独立回滚、整体摘除
+- 独立容器 `zzy-proj`（UID 1000 运行），挂在学习助手域名 `/ZZYProj/` 子路径；可独立回滚、整体摘除
+- 数据卷 `./data/zzy` 对宿主机可读写，备份与 `create_user.py` 不需要 sudo
 
 > 交付基线见 `delivery/20261022-platformify/`（RB / AB / DM / 闸门）。
 
