@@ -5,7 +5,7 @@ RB：v1 frozen 2026-10-22 10:05
 生效：2026-10-22 10:02（nginx reload 起）
 supersedes：无
 权威：本文件。对话结论、PR 描述、README 均为视图。
-仓库/分支：`git@github.com:KMV5120/ZZyProj.git` / `feat/platformify` / `0bb8a52`
+仓库/分支：`git@github.com:KMV5120/ZZyProj.git` / `feat/platformify` / `e71a8a6`（已 push origin/main 与 feat/platformify）
 部署目标：`https://kmv-learning-assistant.xyz/ZZYProj/` → 独立容器 `zzy-proj:8100`（镜像 `sha256:0b34eee964a7…`，UID 1000）
 需求方确认：KMV @ 2026-10-22（本轮 7 项决策问答）
 
