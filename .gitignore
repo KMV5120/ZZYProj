@@ -1,3 +1,12 @@
 tunnel.log
 tunnel.err.log
 known_hosts
+
+# 服务端秘密与运行数据
+.env
+data/
+server/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+evidence/

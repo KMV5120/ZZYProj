@@ -1,0 +1,41 @@
+# ============================================================================
+# ZZyProj 平台 - 独立部署
+# 与学习助手主站只共享 Docker 网络与域名，不共享进程/数据/密钥。
+# 用法：docker compose -f docker-compose.zzy.yml up -d --build
+# 回滚：docker tag zzy-proj:pre-<ver> zzy-proj:latest && docker compose -f ... up -d
+# ============================================================================
+
+services:
+  zzy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zzy-proj:${ZZY_IMAGE_TAG:-latest}
+    container_name: zzy-proj
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8100:8100"
+    env_file:
+      - .env
+    environment:
+      - ZZY_ENV=production
+      - ZZY_DATA_DIR=/app/data
+    volumes:
+      - ./data/zzy:/app/data
+    networks:
+      - web_app-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  web_app-network:
+    external: true

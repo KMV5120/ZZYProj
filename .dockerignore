@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+data
+evidence
+delivery
+tools
+deploy
+server/tests
+server/__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache

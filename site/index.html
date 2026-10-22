@@ -303,6 +303,7 @@
   .msg.err .err-box {
     border: 1px solid #ffd9d3; background: #fff5f4; color: #912018;
     border-radius: var(--r-12); padding: 12px 14px; font-size: 13px;
+    white-space: pre-wrap;
   }
   .err-box .acts { display: flex; gap: 8px; margin-top: 8px; }
   .err-box button { font-size: 12px; border: 1px solid #f5b5ac; color: #912018; background: #fff; border-radius: var(--r-8); padding: 4px 10px; }
@@ -380,6 +381,45 @@
   .modal .ghost:hover { background: #e9ebef; }
   .modal .test { background: #fff; border: 1px solid var(--line-2); color: var(--ink); }
   .modal .test:hover { border-color: var(--accent); }
+  .modal { max-height: 90vh; overflow: auto; }
+  .modal.wide { width: min(780px, 94vw); }
+
+  .quota-chip {
+    font-size: 12px; color: var(--ink-2); white-space: nowrap;
+    background: var(--side); border: 1px solid var(--line);
+    border-radius: 999px; padding: 3px 9px;
+  }
+
+  .auth-tabs { display: flex; gap: 4px; background: #f2f3f5; padding: 4px; border-radius: 10px; margin-bottom: 8px; }
+  .auth-tabs button { flex: 1; height: 32px; border-radius: 8px; font-size: 13px; color: var(--ink-2); }
+  .auth-tabs button[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.06); font-weight: 500; }
+  .code-row { display: flex; gap: 8px; }
+  .code-row input { flex: 1; min-width: 0; }
+  .code-row button {
+    flex: 0 0 118px; height: 40px; border-radius: var(--r-8);
+    border: 1px solid var(--line-2); font-size: 13px; background: #fff;
+  }
+  .code-row button:hover { border-color: var(--accent); }
+  .code-row button:disabled { color: var(--ink-3); cursor: not-allowed; }
+
+  .usage-line { font-size: 13px; color: var(--ink-2); margin: 4px 0; }
+  .admin-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0; }
+  .admin-stat { background: var(--side); border-radius: var(--r-8); padding: 8px; font-size: 12px; color: var(--ink-3); }
+  .admin-stat b { display: block; font-size: 16px; color: var(--ink); }
+  .admin-list { max-height: 42vh; overflow: auto; border: 1px solid var(--line); border-radius: var(--r-8); }
+  .admin-row {
+    display: grid; grid-template-columns: 1fr 52px 78px 92px 112px;
+    gap: 6px; align-items: center; padding: 8px; border-bottom: 1px solid var(--line);
+    font-size: 12px;
+  }
+  .admin-row:last-child { border-bottom: none; }
+  .admin-row .who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .admin-row input { height: 28px; padding: 0 6px; font-size: 12px; }
+  .admin-row button { height: 28px; border-radius: 6px; border: 1px solid var(--line-2); font-size: 12px; }
+  .admin-row .danger { color: var(--bad); border-color: #f5b5ac; }
+  .admin-row .acts { display: flex; gap: 4px; }
+  .admin-row .acts button { flex: 1; padding: 0 4px; }
+  .admin-head { font-size: 12px; color: var(--ink-3); padding: 6px 8px; border-bottom: 1px solid var(--line); background: var(--side); }
 
   .toast {
     position: fixed; left: 50%; top: 20px; transform: translateX(-50%);
@@ -399,6 +439,9 @@
     .samples { grid-template-columns: 1fr; }
     .send { width: 44px; height: 44px; flex-basis: 44px; }
     .convo-title { max-width: 45vw; }
+    .quota-chip { display: none; }
+    .admin-stats { grid-template-columns: 1fr 1fr; }
+    .admin-row { grid-template-columns: 1fr 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -443,25 +486,26 @@
 
           <h4>可核对的事实</h4>
           <ul>
-            <li>单文件 <span class="mono" id="factSize">—</span>，零依赖，双击即开</li>
-            <li>推理走云端 API，页面本身不跑本地模型</li>
+            <li>页面 <span class="mono" id="factSize">—</span>，零依赖，打开即用</li>
+            <li>推理由平台服务端代理，密钥不下发到浏览器</li>
             <li>支持 <span class="mono">deepseek-flash</span> / <span class="mono">deepseek-v4-pro</span></li>
-            <li>密钥只存本机浏览器，不上传</li>
+            <li>对话按账号保存在服务端，换设备可继续</li>
             <li>打字机效果来自流式输出，首字约 1 秒</li>
           </ul>
 
           <h4>使用须知</h4>
           <ul>
-            <li>密钥自备，在 platform.deepseek.com 创建</li>
-            <li>需要联网，按 token 计费（用你自己的额度）</li>
+            <li>需要注册账号；每日消息数与每月 token 有额度</li>
+            <li>额度用完后次日 / 次月自动重置，或由管理员调整</li>
             <li>内容由 AI 生成，重要场合请自行核对</li>
+            <li>由 KMV 学习助手平台提供运行支持</li>
           </ul>
         </div>
       </details>
 
       <div class="side-status">
-        <button class="key-pill warn" id="keyPill" title="点击填写密钥">
-          <span class="dot" aria-hidden="true"></span><span id="keyText">未配置密钥</span>
+        <button class="key-pill warn" id="accountPill" title="登录 / 账号">
+          <span class="dot" aria-hidden="true"></span><span id="accountText">未登录</span>
         </button>
         <button class="icon-btn" id="settingsBtn" aria-label="设置">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -492,6 +536,7 @@
       </div>
 
       <div class="topbar-right">
+        <span class="quota-chip" id="quotaChip" title="今日额度">—</span>
         <button class="ghost-btn" id="exportBtn" title="导出当前对话">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0 3-3m-3 3L5 7M2.5 12.5h11"/></svg>
           导出
@@ -500,10 +545,10 @@
     </header>
 
     <div class="banner" id="keyBanner" hidden>
-      <span id="bannerText">还没有接入 API 密钥，填一个就能开始用。</span>
+      <span id="bannerText">登录后即可开始；也可以先用演示模式看看。</span>
       <span class="acts">
-        <button id="bannerKeyBtn" class="primary">填入密钥</button>
-        <button id="bannerDemoBtn">先用演示模式看看</button>
+        <button id="bannerKeyBtn" class="primary">登录 / 注册</button>
+        <button id="bannerDemoBtn">演示模式</button>
       </span>
     </div>
 
@@ -529,1021 +574,11 @@
   </main>
 </div>
 
-<!-- ================= 设置 ================= -->
+<!-- ================= 弹窗（登录 / 账号 / 管理，由 JS 渲染） ================= -->
 <div class="mask" id="mask">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <h2 id="modalTitle">接入你自己的 API</h2>
-    <p class="desc">
-      页面不含任何密钥，用的是你自己的 DeepSeek 额度。密钥可在
-      <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com/api_keys</a>
-      创建，只保存在本机浏览器。
-    </p>
-
-    <label for="keyInput">API 密钥</label>
-    <input type="password" id="keyInput" placeholder="sk-..." autocomplete="off" spellcheck="false">
-
-    <label for="modelSelect">模型</label>
-    <select id="modelSelect">
-      <option value="deepseek-flash">deepseek-flash · 快，会思考</option>
-      <option value="deepseek-v4-pro">deepseek-v4-pro · 更强，更慢</option>
-    </select>
-
-    <div class="status" id="testStatus"></div>
-
-    <div class="row">
-      <button class="test" id="testBtn">测试连接</button>
-      <button class="primary" id="saveBtn">保存</button>
-    </div>
-    <div class="row">
-      <button class="ghost" id="cancelBtn">取消</button>
-    </div>
-  </div>
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
 </div>
 
-<script>
-'use strict';
-
-/* =======================================================================
-   1. 常量
-   ======================================================================= */
-const ROLE_PROMPT = `你是一个具有独立思考能力的文字创作者，拥有独特的个人风格和表达习惯。
-你的任务是将输入的文本改写为自然、真实的人类表达。
-
-# 写作风格要求
-1. 语言节奏：句子长短交替，避免工整的排比和对称结构
-2. 个人印记：适当加入个人观点、主观感受和犹豫语气
-3. 逻辑特征：允许跳跃性思维，不必事事论证严密
-4. 用词习惯：
-   - 使用口语化表达和生活中的惯用词
-   - 避免"此外、综上所述、值得注意的是"等过渡词堆砌
-   - 适当使用语气词（"吧、呢、嘛、哎"）
-   - 允许少量重复用词，不必频繁换同义词
-5. 标点习惯：
-   - 逗号使用较多，模拟自然停顿
-   - 偶尔使用破折号、省略号表示思维中断
-   - 问号和感叹号根据实际情绪使用，不必克制
-
-# 禁止特征（AI文本典型痕迹）
-1. 不使用"首先、其次、最后"的结构化框架
-2. 不使用"让我们、我们来、接下来"等引导语
-3. 不使用"值得关注的是、需要指出的是"等强调句式
-4. 不使用"在当今社会、随着时代发展"等宏大开头
-5. 不使用每段都有主题句的总分总结构
-6. 不使用完美的递进逻辑和严密的因果关系
-7. 不使用过多专业术语堆砌和学术腔
-8. 不追求面面俱到，允许有遗漏和侧重`;
-
-const MODES = [
-  { id: 'rewrite', label: '去 AI 味改写',
-    task: '用户给你一段文字，把它改写成自然的人话。直接给改写后的结果，不要解释改了什么，不要"改写如下"这类开场。',
-    ph: '把要改写的文字贴进来…' },
-  { id: 'create', label: '文本创作',
-    task: '用户想让你写一段新内容。直接给成品，不要提纲、不要说明写作思路。',
-    ph: '说说你想写什么，比如：写条朋友圈，说今天加班到十点' },
-  { id: 'ask', label: '随便问问',
-    task: '用户在提问。用你自己的语气回答，说人话，别写成百科条目，也别急着分点。',
-    ph: '想问点什么？' },
-  { id: 'academic', label: '学术润色',
-    task: '用户在润色学术文字。保持准确克制，但把翻译腔、八股腔去掉，让它像人认真写的。',
-    ph: '贴上需要润色的论文段落…' },
-  { id: 'code', label: '代码',
-    task: '用户在问代码。代码要能跑，说明用大白话，别堆术语。',
-    ph: '需要写、改，还是解释一段代码？' }
-];
-
-const SAMPLES = [
-  { icon: 'pen',    title: '把 AI 腔改成人话', desc: '粘贴原文，按你平时的语气重写一遍' },
-  { icon: 'bubble', title: '写条朋友圈',      desc: '加班到十点，语气别太丧' },
-  { icon: 'doc',    title: '总结重写一遍',    desc: '别写成汇报稿，像在开会时口头讲' },
-  { icon: 'bulb',   title: '讲明白一件事',    desc: '用大白话解释模型量化压缩' }
-];
-
-const DEMO_TEXT = '大模型这两年跑得实在太快了，快到人有点跟不上。机会一下子多出一大把，可麻烦也跟着一块儿来——说句实话，我们还没完全准备好。';
-
-const STORE = 'lqlm_v3';
-const ENDPOINT = 'https://api.deepseek.com/chat/completions';
-
-/* =======================================================================
-   2. 图标（16px 线性 SVG，替代原来的 emoji）
-   ======================================================================= */
-const ICONS = {
-  pen:    '<path d="M2.5 13.5 3 11l7-7 2 2-7 7-2.5.5Z"/><path d="M10.5 3.5 12 2l2 2-1.5 1.5Z"/>',
-  bubble: '<path d="M13.5 9.5a2 2 0 0 1-2 2H6l-3 2.2V4a2 2 0 0 1 2-2h6.5a2 2 0 0 1 2 2Z"/>',
-  doc:    '<path d="M9 1.8H4.5a1.5 1.5 0 0 0-1.5 1.5v9.4a1.5 1.5 0 0 0 1.5 1.5h7A1.5 1.5 0 0 0 13 12.7V6.3Z"/><path d="M9 1.8v4.5h4"/><path d="M5.5 9h5M5.5 11h3"/>',
-  bulb:   '<path d="M6 12h4"/><path d="M5.8 10.2a4 4 0 1 1 4.4 0c-.2.2-.2.5-.2.8H6c0-.3 0-.6-.2-.8Z"/><path d="M6.5 13.6h3"/>',
-  copy:   '<rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 5.5V4a1.5 1.5 0 0 0-1.5-1.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"/>',
-  redo:   '<path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13.2 2.4v3.2h-3.2"/>',
-  check:  '<path d="M3 8.4 6.2 11.6 13 4.8"/>',
-  chev:   '<path d="M6 4.5 9.5 8 6 11.5"/>',
-  trash:  '<path d="M2.8 4.5h10.4"/><path d="M6.2 4.5V3a1 1 0 0 1 1-1h1.6a1 1 0 0 1 1 1v1.5"/><path d="M4 4.5 4.6 13a1 1 0 0 0 1 .9h4.8a1 1 0 0 0 1-.9L12 4.5"/>',
-  plus:   '<path d="M8 3v10M3 8h10"/>'
-};
-
-function svg(name, size = 14) {
-  return `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
-}
-
-/* =======================================================================
-   3. 状态
-   ======================================================================= */
-const state = {
-  apiKey: '',
-  model: 'deepseek-flash',
-  mode: 'rewrite',
-  demo: false,
-  convos: [],           // {id,title,createdAt,updatedAt,tokens,messages:[]}
-  currentId: null,
-  busy: false,
-  streamingId: null,
-  controller: null
-};
-
-/* DOM */
-const $ = id => document.getElementById(id);
-const chatEl = $('chat'), chatInner = $('chatInner'), inputEl = $('input'),
-      sendBtn = $('send'), modesEl = $('modes'), convoListEl = $('convoList'),
-      convoTitleEl = $('convoTitle'), modelNameEl = $('modelName'),
-      modelMenuEl = $('modelMenu'), modelChipEl = $('modelChip'),
-      charCountEl = $('charCount'), maskEl = $('mask'), keyInput = $('keyInput'),
-      modelSelect = $('modelSelect'), testStatus = $('testStatus'),
-      banner = $('keyBanner'), bannerText = $('bannerText'),
-      keyPill = $('keyPill'), keyText = $('keyText');
-
-/* =======================================================================
-   4. 存取
-   ======================================================================= */
-function load() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(STORE) || '{}');
-    if (raw.apiKey) state.apiKey = raw.apiKey;
-    if (raw.model) state.model = raw.model;
-    if (Array.isArray(raw.convos)) state.convos = raw.convos;
-  } catch (e) { /* 隐私模式下不可用，忽略 */ }
-}
-
-function save() {
-  try {
-    localStorage.setItem(STORE, JSON.stringify({
-      apiKey: state.apiKey, model: state.model, convos: state.convos
-    }));
-  } catch (e) { /* 忽略 */ }
-}
-
-/* =======================================================================
-   5. 会话
-   ======================================================================= */
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-
-function currentConvo() {
-  return state.convos.find(c => c.id === state.currentId) || null;
-}
-
-function ensureConvo(firstText) {
-  let convo = currentConvo();
-  if (convo) return convo;
-  convo = {
-    id: uid(),
-    title: firstText.replace(/\s+/g, ' ').slice(0, 12) + (firstText.length > 12 ? '…' : ''),
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    tokens: 0,
-    messages: []
-  };
-  state.convos.unshift(convo);
-  state.currentId = convo.id;
-  save();
-  return convo;
-}
-
-function newChat() {
-  if (state.busy) stop();
-  state.currentId = null;
-  convoTitleEl.textContent = '新的对话';
-  renderChat();
-  renderConvoList();
-  inputEl.value = '';
-  autoGrow();
-  syncSend();
-  inputEl.focus();
-}
-
-function openConvo(id) {
-  if (state.busy) stop();
-  state.currentId = id;
-  const convo = currentConvo();
-  convoTitleEl.textContent = convo ? convo.title : '新的对话';
-  renderChat();
-  renderConvoList();
-  if (window.innerWidth <= 900) closeSidebar();
-}
-
-function deleteConvo(id, ev) {
-  ev.stopPropagation();
-  state.convos = state.convos.filter(c => c.id !== id);
-  if (state.currentId === id) {
-    state.currentId = null;
-    convoTitleEl.textContent = '新的对话';
-    renderChat();
-  }
-  save();
-  renderConvoList();
-}
-
-function groupOf(ts) {
-  const now = new Date();
-  const d = new Date(ts);
-  const sameDay = now.toDateString() === d.toDateString();
-  if (sameDay) return '今天';
-  if (now - ts < 7 * 864e5) return '最近 7 天';
-  return '更早';
-}
-
-function renderConvoList() {
-  convoListEl.innerHTML = '';
-  if (!state.convos.length) {
-    const hint = document.createElement('div');
-    hint.className = 'group-label';
-    hint.textContent = '还没有会话';
-    convoListEl.appendChild(hint);
-    return;
-  }
-
-  const groups = new Map();
-  state.convos
-    .slice()
-    .sort((a, b) => b.updatedAt - a.updatedAt)
-    .forEach(c => {
-      const g = groupOf(c.updatedAt);
-      if (!groups.has(g)) groups.set(g, []);
-      groups.get(g).push(c);
-    });
-
-  groups.forEach((items, name) => {
-    const label = document.createElement('div');
-    label.className = 'group-label';
-    label.textContent = name;
-    convoListEl.appendChild(label);
-
-    items.forEach(c => {
-      const row = document.createElement('div');
-      row.className = 'convo';
-      row.setAttribute('role', 'button');
-      row.tabIndex = 0;
-      if (c.id === state.currentId) row.setAttribute('aria-current', 'true');
-      row.onclick = () => openConvo(c.id);
-      row.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openConvo(c.id); } };
-
-      const title = document.createElement('span');
-      title.className = 'convo-name';
-      title.textContent = c.title;
-
-      const badge = document.createElement('span');
-      badge.className = 'convo-badge';
-      badge.textContent = '进行中';
-      badge.hidden = c.id !== state.streamingId;
-
-      const del = document.createElement('button');
-      del.className = 'convo-del';
-      del.setAttribute('aria-label', '删除会话 ' + c.title);
-      del.innerHTML = svg('trash', 12);
-      del.onclick = e => deleteConvo(c.id, e);
-
-      row.append(title, badge, del);
-      convoListEl.appendChild(row);
-    });
-  });
-}
-
-/* =======================================================================
-   6. 聊天渲染
-   ======================================================================= */
-function renderChat() {
-  chatInner.innerHTML = '';
-  const convo = currentConvo();
-
-  if (!convo || !convo.messages.length) {
-    chatInner.appendChild(buildEmpty());
-    return;
-  }
-  convo.messages.forEach(m => chatInner.appendChild(buildMessage(m, convo)));
-  if (convo.tokens > 0) chatInner.appendChild(buildMeta(convo));
-  scrollToBottomSoon();
-}
-
-function hideEmpty() {
-  const el = chatInner.querySelector('.empty');
-  if (el) el.remove();
-}
-
-function scrollToBottomSoon() {
-  requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; });
-}
-
-function buildEmpty() {
-  const wrap = document.createElement('div');
-  wrap.className = 'empty';
-  wrap.innerHTML = `<h1>今天想写点什么？</h1><p>贴一段 AI 味的稿子，或者直接说你要什么。</p>`;
-
-  const grid = document.createElement('div');
-  grid.className = 'samples';
-  SAMPLES.forEach(s => {
-    const b = document.createElement('button');
-    b.className = 'sample';
-    b.innerHTML = `
-      <span class="s-title">${svg(s.icon, 14)}${s.title}</span>
-      <span class="s-desc">${s.desc}</span>`;
-    // 只填入，不直接发送：避免误点花 token
-    b.onclick = () => {
-      inputEl.value = s.title === '把 AI 腔改成人话'
-        ? '随着人工智能技术的飞速发展，我们正迎来前所未有的机遇与挑战。'
-        : s.desc;
-      autoGrow(); syncSend(); updateCharCount(); inputEl.focus();
-    };
-    grid.appendChild(b);
-  });
-  wrap.appendChild(grid);
-  return wrap;
-}
-
-function buildUserMessage(m) {
-  const wrap = document.createElement('div');
-  wrap.className = 'msg user';
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble';
-  bubble.textContent = m.content;
-  wrap.appendChild(bubble);
-  return wrap;
-}
-
-function buildBotMessage(m, convo) {
-  const wrap = document.createElement('div');
-  wrap.className = 'msg bot' + (m.superseded ? ' superseded' : '');
-  wrap.dataset.mid = m.id;
-
-  if (m.superseded) {
-    const tag = document.createElement('span');
-    tag.className = 'prev-tag';
-    tag.textContent = '上一版';
-    wrap.appendChild(tag);
-  }
-
-  if (m.reasoning) {
-    wrap.appendChild(buildThink(m.reasoning));
-  }
-
-  const md = document.createElement('div');
-  md.className = 'md';
-  md.innerHTML = mdToHtml(m.content || '');
-  wrap.appendChild(md);
-
-  wrap.appendChild(buildActions(m, convo));
-  return wrap;
-}
-
-function buildThink(text) {
-  const d = document.createElement('details');
-  d.className = 'think';
-  const sum = document.createElement('summary');
-  sum.innerHTML = `${svg('chev', 12)}<span>想了想…</span>`;
-  const body = document.createElement('div');
-  body.className = 'think-body';
-  body.textContent = text;
-  d.append(sum, body);
-  return d;
-}
-
-function buildActions(m, convo) {
-  const row = document.createElement('div');
-  row.className = 'actions';
-
-  const copy = document.createElement('button');
-  copy.innerHTML = `${svg('copy', 12)}复制`;
-  copy.onclick = () => {
-    navigator.clipboard.writeText(m.content || '').then(() => {
-      copy.innerHTML = `${svg('check', 12)}已复制`;
-      setTimeout(() => (copy.innerHTML = `${svg('copy', 12)}复制`), 1500);
-    }).catch(() => toast('复制失败，请手动选中'));
-  };
-
-  const redo = document.createElement('button');
-  redo.innerHTML = `${svg('redo', 12)}重新生成`;
-  redo.onclick = () => regenerate(m, convo);
-
-  const adopt = document.createElement('button');
-  const paint = () => {
-    adopt.className = m.accepted ? 'accepted' : '';
-    adopt.innerHTML = `${svg('check', 12)}${m.accepted ? '已采纳为定稿' : '采纳为定稿'}`;
-  };
-  paint();
-  adopt.onclick = () => {
-    m.accepted = !m.accepted;
-    paint();
-    save();
-    toast(m.accepted ? '已标记为定稿' : '已取消定稿');
-  };
-
-  row.append(copy, redo, adopt);
-  return row;
-}
-
-function buildMeta(convo) {
-  const el = document.createElement('div');
-  el.className = 'conv-meta';
-  el.textContent = `本次对话 ${convo.tokens.toLocaleString()} tokens · 密钥只在本机`;
-  return el;
-}
-
-function appendMetaIfNeeded(convo) {
-  const old = chatInner.querySelector('.conv-meta');
-  if (old) old.remove();
-  if (convo.tokens > 0) chatInner.appendChild(buildMeta(convo));
-}
-
-/* =======================================================================
-   7. Markdown（支持列表、引用、代码块、标题、加粗）
-   ======================================================================= */
-function escapeHtml(s) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-function inlineMd(s) {
-  return escapeHtml(s)
-    .replace(/`([^`\n]+)`/g, '<code>$1</code>')
-    .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
-}
-
-function mdToHtml(src) {
-  const lines = String(src || '').split('\n');
-  const out = [];
-  let inCode = false, codeBuf = [], listBuf = [], paraBuf = [];
-
-  const flushPara = () => {
-    if (paraBuf.length) { out.push(`<p>${paraBuf.join('<br>')}</p>`); paraBuf = []; }
-  };
-  const flushList = () => {
-    if (listBuf.length) {
-      out.push(`<ul>${listBuf.map(x => `<li>${x}</li>`).join('')}</ul>`);
-      listBuf = [];
-    }
-  };
-  const flushAll = () => { flushPara(); flushList(); };
-
-  for (const raw of lines) {
-    const line = raw.replace(/\s+$/, '');
-
-    if (/^\s*```/.test(line)) {
-      if (!inCode) { flushAll(); inCode = true; codeBuf = []; }
-      else {
-        inCode = false;
-        out.push(`<pre><code>${escapeHtml(codeBuf.join('\n'))}</code></pre>`);
-      }
-      continue;
-    }
-    if (inCode) { codeBuf.push(raw); continue; }
-
-    const t = line.trim();
-    if (!t) { flushAll(); continue; }
-
-    const li = t.match(/^[-*•]\s+(.*)$/) || t.match(/^\d+[.、)]\s+(.*)$/);
-    if (li) { flushPara(); listBuf.push(inlineMd(li[1])); continue; }
-
-    if (t.startsWith('>')) { flushAll(); out.push(`<blockquote>${inlineMd(t.replace(/^>\s?/, ''))}</blockquote>`); continue; }
-
-    if (/^#{1,6}\s+/.test(t)) { flushAll(); out.push(`<h4>${inlineMd(t.replace(/^#{1,6}\s+/, ''))}</h4>`); continue; }
-
-    flushList();
-    paraBuf.push(inlineMd(t));
-  }
-  if (inCode) out.push(`<pre><code>${escapeHtml(codeBuf.join('\n'))}</code></pre>`);
-  flushAll();
-  return out.join('');
-}
-
-/* =======================================================================
-   8. 发送与流式
-   ======================================================================= */
-function onSend() {
-  if (state.busy) { stop(); return; }
-  sendMessage();
-}
-
-async function sendMessage() {
-  const text = inputEl.value.trim();
-  if (!text || state.busy) return;
-
-  if (!state.apiKey && !state.demo) {
-    banner.hidden = false;
-    appendError('还没有接入密钥。点上面的“填入密钥”，或者先用演示模式看看效果。', true);
-    return;
-  }
-
-  const convo = ensureConvo(text);
-  convoTitleEl.textContent = convo.title;
-
-  inputEl.value = '';
-  autoGrow(); syncSend();
-  charCountEl.textContent = '0 字';
-
-  const userMsg = { id: uid(), role: 'user', content: text };
-  convo.messages.push(userMsg);
-  convo.updatedAt = Date.now();
-  hideEmpty();
-  chatInner.appendChild(buildUserMessage(userMsg));
-  scrollToBottomSoon();
-
-  await runBotTurn(convo);
-}
-
-/* 发一轮请求，把结果追加到会话末尾 */
-async function runBotTurn(convo) {
-  const apiMessages = buildApiMessages(convo);
-  const botMsg = { id: uid(), role: 'assistant', content: '', reasoning: '', tokens: 0 };
-  convo.messages.push(botMsg);
-
-  const node = buildBotMessage(botMsg, convo);
-  const mdEl = node.querySelector('.md');
-  mdEl.innerHTML = '<span class="dots"><span></span><span></span><span></span></span>';
-  const actionsEl = node.querySelector('.actions');
-  if (actionsEl) actionsEl.remove();
-  hideEmpty();
-  chatInner.appendChild(node);
-  scrollToBottomSoon();
-
-  state.busy = true;
-  state.streamingId = convo.id;
-  renderConvoList();
-  setBusyUI(true);
-  save();
-
-  const textNode = document.createTextNode('');
-  const cursor = document.createElement('span');
-  cursor.className = 'cursor';
-  let thinkEl = null, thinkBody = null;
-
-  const beginStreamingDom = () => {
-    mdEl.innerHTML = '';
-    mdEl.appendChild(textNode);
-    mdEl.appendChild(cursor);
-  };
-
-  try {
-    if (state.demo) {
-      await demoStream(chunk => {
-        if (!textNode.parentNode) beginStreamingDom();
-        const stick = nearBottom();
-        textNode.appendData(chunk);
-        botMsg.content += chunk;
-        if (stick) chatEl.scrollTop = chatEl.scrollHeight;
-      });
-    } else {
-      state.controller = new AbortController();
-      await streamChat(apiMessages, {
-        onReasoning(chunk) {
-          if (!thinkEl) {
-            thinkEl = buildThink('');
-            thinkEl.open = true;
-            thinkBody = thinkEl.querySelector('.think-body');
-            node.insertBefore(thinkEl, mdEl);
-          }
-          thinkBody.textContent += chunk;
-          botMsg.reasoning += chunk;
-        },
-        onContent(chunk) {
-          if (!textNode.parentNode) beginStreamingDom();
-          if (thinkEl && thinkEl.open) thinkEl.open = false;
-          const stick = nearBottom();
-          textNode.appendData(chunk);
-          botMsg.content += chunk;
-          if (stick) chatEl.scrollTop = chatEl.scrollHeight;
-        },
-        onUsage(u) {
-          if (u.total_tokens) {
-            botMsg.tokens = u.total_tokens;
-            convo.tokens = (convo.tokens || 0) + u.total_tokens;
-          }
-        }
-      }, state.controller.signal);
-    }
-
-    cursor.remove();
-    mdEl.innerHTML = mdToHtml(botMsg.content || '（这次没憋出内容，再试一次吧）');
-    node.appendChild(buildActions(botMsg, convo));
-    convo.updatedAt = Date.now();
-    appendMetaIfNeeded(convo);
-    save();
-  } catch (err) {
-    if (err.name === 'AbortError') {
-      cursor.remove();
-      if (botMsg.content) {
-        mdEl.innerHTML = mdToHtml(botMsg.content);
-        node.appendChild(buildActions(botMsg, convo));
-      } else {
-        node.remove();
-        convo.messages = convo.messages.filter(m => m.id !== botMsg.id);
-      }
-    } else {
-      node.remove();
-      convo.messages = convo.messages.filter(m => m.id !== botMsg.id);
-      appendError(err.message || String(err), !!err.needsKey);
-    }
-  } finally {
-    state.busy = false;
-    state.streamingId = null;
-    state.controller = null;
-    setBusyUI(false);
-    save();
-    renderConvoList();
-    inputEl.focus();
-  }
-}
-
-function buildApiMessages(convo) {
-  const mode = MODES.find(m => m.id === state.mode) || MODES[0];
-  const sys = { role: 'system', content: ROLE_PROMPT + '\n\n# 本轮任务\n' + mode.task };
-  const turns = convo.messages
-    .filter(m => (m.role === 'user' || m.role === 'assistant') && m.content && !m.superseded)
-    .slice(-12)
-    .map(m => ({ role: m.role, content: m.content }));
-  return [sys].concat(turns);
-}
-
-/* 重新生成：旧的那条留着并标「上一版」，新的一版接在后面 */
-async function regenerate(botMsg, convo) {
-  if (state.busy) return;
-  botMsg.superseded = true;
-  save();
-  renderChat();
-  chatEl.scrollTop = chatEl.scrollHeight;
-  await runBotTurn(convo);
-}
-
-function stop() {
-  if (state.controller) state.controller.abort();
-}
-
-function setBusyUI(busy) {
-  sendBtn.classList.toggle('stop', busy);
-  sendBtn.textContent = busy ? '■' : '↑';
-  sendBtn.setAttribute('aria-label', busy ? '停止生成' : '发送');
-  syncSend();
-}
-
-function syncSend() {
-  sendBtn.disabled = state.busy ? false : !inputEl.value.trim();
-}
-
-function updateCharCount() {
-  charCountEl.textContent = inputEl.value.trim().length + ' 字';
-}
-
-function autoGrow() {
-  inputEl.style.height = 'auto';
-  inputEl.style.height = Math.min(inputEl.scrollHeight, 180) + 'px';
-}
-
-function nearBottom() {
-  return chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight < 80;
-}
-
-function scrollIfNearBottom(force) {
-  if (force || nearBottom()) chatEl.scrollTop = chatEl.scrollHeight;
-}
-
-/* 错误提示 */
-function appendError(msg, needsKey) {
-  const wrap = document.createElement('div');
-  wrap.className = 'msg err';
-  wrap.innerHTML = `<div class="err-box">${escapeHtml(msg)}
-    ${needsKey ? '<div class="acts"><button data-act="key">填入密钥</button><button data-act="demo">用演示模式</button></div>' : ''}
-  </div>`;
-  wrap.querySelectorAll('button[data-act]').forEach(b => {
-    b.onclick = () => {
-      if (b.dataset.act === 'key') openSettings();
-      else enterDemo();
-      wrap.remove();
-    };
-  });
-  chatInner.appendChild(wrap);
-  scrollIfNearBottom(true);
-}
-
-/* 演示模式：没有密钥也能看界面 */
-function enterDemo() {
-  state.demo = true;
-  banner.hidden = false;
-  bannerText.textContent = '演示模式：回复是内置示例，接入密钥后才是真的模型。';
-  $('bannerDemoBtn').hidden = true;
-  $('bannerKeyBtn').textContent = '接入真实模型';
-  toast('已进入演示模式');
-}
-
-function demoStream(onChunk) {
-  return new Promise(resolve => {
-    let i = 0;
-    const timer = setInterval(() => {
-      const step = 1 + Math.floor(Math.random() * 3);
-      const chunk = DEMO_TEXT.slice(i, i + step);
-      i += step;
-      if (chunk) onChunk(chunk);
-      if (i >= DEMO_TEXT.length) { clearInterval(timer); resolve(); }
-    }, 40);
-  });
-}
-
-/* =======================================================================
-   9. 网络
-   ======================================================================= */
-function friendlyError(status, detail) {
-  const map = {
-    401: '密钥无效或填错了，点右上角设置重新填一次。',
-    402: '账户余额不足，去 platform.deepseek.com 充值后再试。',
-    429: '请求太频繁，等几秒再发。',
-    500: '服务端出问题了，稍后再试。',
-    503: '服务器繁忙，稍后再试。'
-  };
-  const head = map[status] || `请求失败（HTTP ${status}）`;
-  return detail ? `${head}\n${String(detail).slice(0, 200)}` : head;
-}
-
-async function streamChat(messages, handlers, signal) {
-  const resp = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.apiKey },
-    body: JSON.stringify({ model: state.model, messages, stream: true }),
-    signal
-  });
-
-  if (!resp.ok) {
-    let detail = '';
-    try { const j = await resp.json(); detail = (j.error && j.error.message) || ''; } catch (e) { /* 忽略 */ }
-    const err = new Error(friendlyError(resp.status, detail));
-    err.needsKey = resp.status === 401 || resp.status === 402;
-    throw err;
-  }
-
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder('utf-8');
-  let buffer = '';
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop();
-
-    for (const raw of lines) {
-      const line = raw.trim();
-      if (!line.startsWith('data:')) continue;
-      const payload = line.slice(5).trim();
-      if (!payload || payload === '[DONE]') continue;
-      let evt;
-      try { evt = JSON.parse(payload); } catch (e) { continue; }
-      if (evt.usage) handlers.onUsage(evt.usage);
-      const delta = evt.choices && evt.choices[0] && evt.choices[0].delta;
-      if (!delta) continue;
-      if (delta.reasoning_content) handlers.onReasoning(delta.reasoning_content);
-      if (delta.content) handlers.onContent(delta.content);
-    }
-  }
-}
-
-/* =======================================================================
-   10. 设置 / 顶栏 / 导出
-   ======================================================================= */
-function openSettings() {
-  keyInput.value = state.apiKey;
-  modelSelect.value = state.model;
-  testStatus.className = 'status';
-  testStatus.textContent = '';
-  maskEl.classList.add('show');
-  setTimeout(() => keyInput.focus(), 40);
-}
-
-function closeSettings() { maskEl.classList.remove('show'); }
-
-function applyKeyState() {
-  const ok = !!state.apiKey;
-  keyPill.classList.toggle('warn', !ok);
-  keyText.textContent = ok ? '密钥已配置' : '未配置密钥';
-  keyPill.setAttribute('aria-label', ok ? '密钥已配置，点击修改' : '未配置密钥，点击填写');
-  banner.hidden = ok || state.demo;
-  if (ok) {
-    bannerText.textContent = '还没有接入 API 密钥，填一个就能开始用。';
-    $('bannerDemoBtn').hidden = false;
-    $('bannerKeyBtn').textContent = '填入密钥';
-    state.demo = false;
-  }
-  modelNameEl.textContent = state.model;
-}
-
-function saveSettings() {
-  const key = keyInput.value.trim();
-  if (key && !/^sk-[A-Za-z0-9_\-]{10,}$/.test(key)) {
-    testStatus.className = 'status bad';
-    testStatus.textContent = '格式不太对，DeepSeek 的密钥一般以 sk- 开头。';
-    return;
-  }
-  state.apiKey = key;
-  state.model = modelSelect.value;
-  save();
-  applyKeyState();
-  closeSettings();
-  toast(key ? '设置已保存' : '已清除密钥');
-}
-
-async function testConnection() {
-  const key = keyInput.value.trim();
-  if (!key) {
-    testStatus.className = 'status bad';
-    testStatus.textContent = '先填密钥再测。';
-    return;
-  }
-  testStatus.className = 'status';
-  testStatus.textContent = '正在连接…';
-  const t0 = performance.now();
-  try {
-    const resp = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-      body: JSON.stringify({
-        model: modelSelect.value,
-        messages: [{ role: 'user', content: '回复"通"一个字' }],
-        max_tokens: 8
-      })
-    });
-    const ms = Math.round(performance.now() - t0);
-    if (!resp.ok) {
-      let detail = '';
-      try { const j = await resp.json(); detail = (j.error && j.error.message) || ''; } catch (e) { /* 忽略 */ }
-      testStatus.className = 'status bad';
-      testStatus.textContent = friendlyError(resp.status, detail);
-    } else {
-      const data = await resp.json();
-      const word = (data.choices && data.choices[0] && data.choices[0].message.content || '').trim();
-      testStatus.className = 'status ok';
-      testStatus.textContent = `连接成功，${ms}ms，模型回复：${word.slice(0, 12)}`;
-    }
-  } catch (e) {
-    testStatus.className = 'status bad';
-    testStatus.textContent = '连不上：' + (e.message || e) + '（检查网络）';
-  }
-}
-
-function renderModelMenu() {
-  modelMenuEl.innerHTML = '';
-  [
-    { id: 'deepseek-flash', desc: '快，会思考' },
-    { id: 'deepseek-v4-pro', desc: '更强，更慢' }
-  ].forEach(m => {
-    const b = document.createElement('button');
-    b.setAttribute('role', 'menuitemradio');
-    b.setAttribute('aria-checked', String(m.id === state.model));
-    b.innerHTML = `${m.id}<span>${m.desc}</span>`;
-    b.onclick = () => {
-      state.model = m.id;
-      save();
-      applyKeyState();
-      renderModelMenu();
-      toggleModelMenu(false);
-    };
-    modelMenuEl.appendChild(b);
-  });
-}
-
-function toggleModelMenu(show) {
-  const open = show === undefined ? modelMenuEl.hidden : show;
-  modelMenuEl.hidden = !open;
-  modelChipEl.setAttribute('aria-expanded', String(open));
-  if (open) renderModelMenu();
-}
-
-function exportConvo() {
-  const convo = currentConvo();
-  if (!convo || !convo.messages.length) { toast('还没有可导出的对话'); return; }
-  const lines = [`# ${convo.title}`, ''];
-  convo.messages.forEach(m => {
-    if (!m.content) return;
-    lines.push(m.role === 'user' ? '**你：**' : '**模型：**', '', m.content, '');
-  });
-  const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = convo.title.replace(/[\\/:*?"<>|]/g, '_') + '.md';
-  a.click();
-  URL.revokeObjectURL(a.href);
-  toast('已导出 Markdown');
-}
-
-function toast(msg) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  requestAnimationFrame(() => (t.style.opacity = '1'));
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 220); }, 1500);
-}
-
-/* =======================================================================
-   11. 侧栏
-   ======================================================================= */
-function toggleSidebar() {
-  const bar = $('sidebar');
-  bar.classList.toggle('collapsed');
-  const open = !bar.classList.contains('collapsed');
-  if (window.innerWidth <= 900) $('scrim').classList.toggle('show', open);
-}
-function closeSidebar() {
-  $('sidebar').classList.add('collapsed');
-  $('scrim').classList.remove('show');
-}
-function openSidebar() {
-  $('sidebar').classList.remove('collapsed');
-  if (window.innerWidth <= 900) $('scrim').classList.add('show');
-}
-
-/* =======================================================================
-   12. 模式
-   ======================================================================= */
-function renderModes() {
-  modesEl.innerHTML = '';
-  MODES.forEach(m => {
-    const b = document.createElement('button');
-    b.className = 'mode';
-    b.textContent = m.label;
-    b.setAttribute('role', 'button');
-    b.setAttribute('aria-pressed', String(m.id === state.mode));
-    b.onclick = () => {
-      state.mode = m.id;
-      renderModes();
-      inputEl.placeholder = m.ph;
-    };
-    modesEl.appendChild(b);
-  });
-}
-
-/* =======================================================================
-   13. 事件绑定
-   ======================================================================= */
-inputEl.addEventListener('input', () => {
-  autoGrow();
-  syncSend();
-  updateCharCount();
-});
-inputEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-    e.preventDefault();
-    if (!state.busy) sendMessage();
-  }
-});
-
-sendBtn.addEventListener('click', onSend);
-$('newChatBtn').addEventListener('click', newChat);
-$('collapseBtn').addEventListener('click', toggleSidebar);
-$('menuBtn').addEventListener('click', () => {
-  const bar = $('sidebar');
-  if (bar.classList.contains('collapsed')) openSidebar(); else closeSidebar();
-});
-$('scrim').addEventListener('click', closeSidebar);
-$('settingsBtn').addEventListener('click', openSettings);
-keyPill.addEventListener('click', openSettings);
-$('exportBtn').addEventListener('click', exportConvo);
-$('testBtn').addEventListener('click', testConnection);
-$('saveBtn').addEventListener('click', saveSettings);
-$('cancelBtn').addEventListener('click', closeSettings);
-maskEl.addEventListener('click', e => { if (e.target === maskEl) closeSettings(); });
-modelChipEl.addEventListener('click', () => toggleModelMenu());
-$('bannerKeyBtn').addEventListener('click', openSettings);
-$('bannerDemoBtn').addEventListener('click', enterDemo);
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeSettings(); toggleModelMenu(false); }
-  // Alt+N：浏览器不会占用这个组合，Ctrl+K 会被地址栏吃掉，所以主打 Alt+N
-  if (e.altKey && e.key.toLowerCase() === 'n') {
-    e.preventDefault();
-    newChat();
-  }
-});
-document.addEventListener('click', e => {
-  if (!e.target.closest('.model-wrap')) toggleModelMenu(false);
-});
-
-/* =======================================================================
-   14. 启动
-   ======================================================================= */
-load();
-$('factSize').textContent = Math.round(new Blob([document.documentElement.outerHTML]).size / 1024) + ' KB';
-renderModes();
-applyKeyState();
-renderConvoList();
-renderChat();
-inputEl.placeholder = MODES[0].ph;
-autoGrow();
-syncSend();
-if (window.innerWidth <= 900) closeSidebar();
-inputEl.focus();
-</script>
+<script src="static/app.js"></script>
 </body>
 </html>
